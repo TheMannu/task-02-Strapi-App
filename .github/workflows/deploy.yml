@@ -34,7 +34,7 @@ jobs:
         sudo chmod 400 key.pem
         scp -o StrictHostKeyChecking=no -i key.pem -r ./* $EC2_USER@$EC2_IP:/home/ubuntu
         ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_IP << 'EOF'
-        cd /home/ubuntu
+        cd /home/ubuntu/my-project
           yarn install
           pm2 restart strapi || pm2 start npm --name "strapi" -- run develop
         EOF

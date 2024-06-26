@@ -19,8 +19,9 @@ jobs:
         node-version: '18.19.1'
         
     - name: Install Strapi
-      run: sudo npm install strapi@latest -g
-
+      run: |
+        sudo npm install strapi@latest -g
+        strapi build
     - name: Install dependencies
       run: |
         sudo npm install yarn -g

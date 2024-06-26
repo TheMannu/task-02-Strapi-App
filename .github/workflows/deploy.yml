@@ -22,6 +22,7 @@ jobs:
       run: |
         sudo npm install strapi@latest -g
         strapi build
+        
     - name: Install dependencies
       run: |
         sudo npm install yarn -g
@@ -37,7 +38,8 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i $EC2_KEY $EC2_USER@$EC2_HOST << 'EOF'
           cd my-project
           git pull origin main
-          sudo npm install yarn -g
-          yarn build
-          yarn develop
+          sudo npm install -g strapi@latest
+          npm install
+          strapi build
+          npm run develop
         EOF

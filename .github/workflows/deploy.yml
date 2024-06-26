@@ -32,7 +32,6 @@ jobs:
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
         chmod 600 key.pem
-        scp -o StrictHostKeyChecking=no -i key.pem -r ./* $EC2_USER@$EC2_IP:/home/ubuntu/my-project
         ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_IP << 'EOF'
         cd /home/ubuntu/my-project
           yarn install

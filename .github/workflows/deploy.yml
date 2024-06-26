@@ -1,0 +1,42 @@
+name: Deploy Strapi Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          cd /home/ubuntu/my-project
+          git pull origin main || (git remote add origin <remote-url> && git pull origin main)
+          npm install
+          npm run build
+          pm2 start npm --name strapi -- run develop
+          pm2 save
+
+    - name: Set NODE_ENV to production
+      run: echo "NODE_ENV=production" >> $GITHUB_ENV
+
+    - name: Run npm audit fix
+      run: npm audit fix --force
+
+    - name: Build and start the Strapi application
+      run: |
+        npm run build
+        pm2 start npm --name strapi -- run develop
+        pm2 save
+      timeout-minutes: 20

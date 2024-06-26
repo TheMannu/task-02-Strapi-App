@@ -32,5 +32,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}  # SSH private key stored in GitHub Secrets
         script:  |
           cd /home/ubuntu/my-project
+          git pull origin main
           yarn install
-          pm2 restart  || pm2 start npm --name "strapi" -- run develop
+          yarn build
+          pm2 restart 

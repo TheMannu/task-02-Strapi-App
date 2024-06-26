@@ -16,32 +16,25 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '18.19.1'
+        node-version: '18'
 
-    - name: Install Strapi CLI
-      run: |
-        sudo npm install strapi@latest -g
+    - name: Install dependencies
+      run: yarn install
 
-    - name: Install Global Dependencies
-      run: |
-        sudo npm install yarn -g
-
-    - name: Install Project Dependencies and Build
-      run: |
-        yarn install
-        yarn build
+    - name: Build strapi
+      run: yarn build
 
     - name: Deploy to EC2
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /my-project
-          git pull origin main
-          npm install
-          strapi build
-          # Adjust the following command as per your deployment needs
-          NODE_ENV=production npm run start
-        
+      env:
+        EC2_IP: ${{ secrets.EC2_IP }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+        chmod 400 key.pem
+        scp -o StrictHostKeyChecking=no -i key.pem -r ./* $EC2_USER@$EC2_IP:/home/ubuntu/strapi
+        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_IP << 'EOF'
+        cd /home/ubuntu/my-project
+          yarn install
+          pm2 restart strapi || pm2 start npm --name "strapi" -- run develop
+        EOF

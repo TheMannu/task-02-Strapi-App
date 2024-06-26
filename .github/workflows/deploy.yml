@@ -17,17 +17,19 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '18.19.1'
-        
-    - name: Install Strapi
+
+    - name: Install Strapi CLI
       run: |
         sudo npm install strapi@latest -g
-        strapi build
-        
-    - name: Install dependencies
+
+    - name: Install Global Dependencies
       run: |
         sudo npm install yarn -g
+
+    - name: Install Project Dependencies and Build
+      run: |
+        yarn install
         yarn build
-        
 
     - name: Deploy to EC2
       env:
@@ -36,10 +38,10 @@ jobs:
         EC2_HOST: ${{ secrets.EC2_HOST }}
       run: |
         ssh -o StrictHostKeyChecking=no -i $EC2_KEY $EC2_USER@$EC2_HOST << 'EOF'
-          cd my-project
+          cd /path/to/your/strapi/project
           git pull origin main
-          sudo npm install -g strapi@latest
           npm install
           strapi build
-          npm run develop
+          # Adjust the following command as per your deployment needs
+          NODE_ENV=production npm run start
         EOF
